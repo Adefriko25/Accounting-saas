@@ -629,3 +629,130 @@ body {
 
 .toast-success { border-left: 4px solid var(--accent-emerald); }
 .toast-error { border-left: 4px solid var(--accent-rose); }
+
+/* ==========================================
+   RESPONSIVE DESIGN (MOBILE & TABLET)
+   ========================================== */
+
+/* Mobile Topbar (Hidden on desktop) */
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.menu-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: var(--transition-smooth);
+}
+
+.menu-toggle:hover {
+  color: var(--accent-blue);
+  transform: scale(1.1);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .mobile-topbar {
+    display: flex;
+  }
+
+  /* Transform Sidebar into full overlay drawer on mobile */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    height: 100vh;
+    width: 280px;
+    z-index: 1000;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.8);
+    transition: var(--transition-smooth);
+    border-right: 1px solid var(--glass-border);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .main-content {
+    padding: 24px 16px;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .header-title {
+    font-size: 26px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .chart-card {
+    min-height: auto;
+    padding: 16px;
+  }
+
+  /* Form grids on mobile */
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .btn-submit {
+    width: 100%; /* Tombol submit melebar penuh di mobile */
+  }
+
+  .table-responsive {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metric-value {
+    font-size: 22px;
+  }
+}

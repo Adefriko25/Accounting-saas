@@ -22,6 +22,7 @@ import {
 export default function App() {
   // Navigation & Core States
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -313,8 +314,22 @@ export default function App() {
         ))}
       </div>
 
+      {/* Mobile Topbar */}
+      <div className="mobile-topbar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="brand-icon" style={{ width: '34px', height: '34px', fontSize: '16px' }}>A</div>
+          <span className="brand-name" style={{ fontSize: '18px' }}>Accounting SaaS</span>
+        </div>
+        <button className="menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)} aria-label="Toggle Menu">
+          <List size={22} />
+        </button>
+      </div>
+
+      {/* Sidebar Drawer Overlay */}
+      {isSidebarOpen && <div className="sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>}
+
       {/* Sidebar Navigation */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="brand-section">
           <div className="brand-icon">A</div>
           <span className="brand-name">Accounting SaaS</span>
@@ -333,7 +348,10 @@ export default function App() {
           ].map(item => (
             <li key={item.name} className="nav-item">
               <a 
-                onClick={() => setActiveMenu(item.name)} 
+                onClick={() => {
+                  setActiveMenu(item.name);
+                  setIsSidebarOpen(false); // Otomatis tutup drawer di mobile saat diklik
+                }} 
                 className={`nav-link ${activeMenu === item.name ? 'active' : ''}`}
               >
                 {item.icon}
