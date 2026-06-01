@@ -112,6 +112,32 @@ def handle_accounts():
     # GET method
     return jsonify(load_accounts())
 
+@app.route('/api/accounts/<string:account_name>', methods=['DELETE'])
+def delete_account(account_name):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Cek apakah akun ini digunakan dalam transaksi
+        cursor.execute("SELECT id FROM transactions WHERE debit = %s OR credit = %s LIMIT 1", (account_name, account_name))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({"error": "Akun tidak dapat dihapus karena masih digunakan dalam riwayat transaksi!"}), 400
+            
+        # Cek apakah akun ini terdaftar
+        cursor.execute("SELECT account FROM accounts WHERE account = %s", (account_name,))
+        if not cursor.fetchone():
+            conn.close()
+            return jsonify({"error": "Akun tidak ditemukan!"}), 404
+            
+        # Hapus akun
+        cursor.execute("DELETE FROM accounts WHERE account = %s", (account_name,))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": f"Akun '{account_name}' berhasil dihapus!"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # 2. Transactions API
 @app.route('/api/transactions', methods=['GET', 'POST'])
 def handle_transactions():
@@ -614,6 +640,22 @@ def get_cashflow():
         "months": months_keys + ['Full Year'],
         "rows": rows
     })
+
+# 9. Reset Database API
+@app.route('/api/reset', methods=['POST'])
+def reset_database():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Hapus semua transaksi dan akun secara aman
+        cursor.execute("DELETE FROM transactions")
+        cursor.execute("DELETE FROM accounts")
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Seluruh data pembukuan & daftar akun berhasil di-reset!"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Handler jika frontend me-request halaman non-API (opsional, disajikan oleh Vercel secara default)
 @app.route('/', defaults={'path': ''})

@@ -302,6 +302,41 @@ export default function App() {
     }
   };
 
+  const handleDeleteAccount = async (accountName) => {
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus akun '${accountName}'?`)) return;
+    try {
+      const res = await fetch(`/api/accounts/${encodeURIComponent(accountName)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        addToast(data.message, "success");
+        fetchAccounts();
+      } else {
+        addToast(data.error || "Gagal menghapus akun", "error");
+      }
+    } catch (err) {
+      addToast("Terjadi kesalahan koneksi server", "error");
+    }
+  };
+
+  const handleResetDatabase = async () => {
+    if (!window.confirm("🔴 PERINGATAN CRITICAL: Apakah Anda benar-benar ingin menghapus SELURUH daftar akun dan semua riwayat transaksi jurnal secara permanen? Tindakan ini tidak dapat dibatalkan!")) return;
+    if (!window.confirm("Apakah Anda yakin 100% ingin mengosongkan database pembukuan?")) return;
+    try {
+      const res = await fetch('/api/reset', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        addToast(data.message, "success");
+        fetchAccounts();
+        fetchTransactions();
+        setActiveMenu('Dashboard'); // Kembali ke Dashboard setelah reset
+      } else {
+        addToast(data.error || "Gagal melakukan reset data", "error");
+      }
+    } catch (err) {
+      addToast("Terjadi kesalahan koneksi server", "error");
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Toast Notifications */}
@@ -631,6 +666,7 @@ export default function App() {
                       <tr>
                         <th>Nama Akun</th>
                         <th>Tipe Akun (Kelompok Akun)</th>
+                        <th className="text-center" style={{ width: '100px' }}>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -646,11 +682,20 @@ export default function App() {
                                 {acc.type}
                               </span>
                             </td>
+                            <td className="text-center">
+                              <button 
+                                onClick={() => handleDeleteAccount(acc.account)} 
+                                className="btn-delete"
+                                title="Hapus Akun"
+                              >
+                                <Trash2 size={12} /> Hapus
+                              </button>
+                            </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="2" className="text-center" style={{ color: 'var(--text-muted)' }}>Belum ada akun terdaftar. Tambahkan akun baru di bawah.</td>
+                          <td colSpan="3" className="text-center" style={{ color: 'var(--text-muted)' }}>Belum ada akun terdaftar. Tambahkan akun baru di bawah.</td>
                         </tr>
                       )}
                     </tbody>
@@ -687,6 +732,18 @@ export default function App() {
                     </button>
                   </div>
                 </form>
+
+                <div style={{ marginTop: '40px', borderTop: '1px solid rgba(244, 63, 94, 0.2)', paddingTop: '24px' }}>
+                  <h5 className="rose-text" style={{ fontSize: '15px', fontWeight: '600', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={16} /> Zona Bahaya (Danger Zone)
+                  </h5>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px', lineHeight: '1.5' }}>
+                    Tindakan ini akan menghapus permanen seluruh daftar akun dan semua riwayat transaksi dari database MySQL Anda secara permanen. Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                  <button onClick={handleResetDatabase} className="btn-delete" style={{ padding: '10px 20px', fontSize: '13px', fontWeight: '600' }}>
+                    <RotateCcw size={14} /> Reset Seluruh Data Pembukuan
+                  </button>
+                </div>
               </div>
             )}
 
