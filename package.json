@@ -1,7 +1,24 @@
 {
-  "name": "accounting-saas-root",
+  "name": "accounting-saas",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "cd frontend && npm install && npm run build"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@neondatabase/serverless": "^0.9.0",
+    "lucide-react": "^0.400.0",
+    "recharts": "^2.12.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
   }
 }
