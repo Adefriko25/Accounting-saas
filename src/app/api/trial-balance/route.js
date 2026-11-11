@@ -1,13 +1,20 @@
-import { NextResponse } from 'next/server';
-import { initializeDatabase, getAccounts, getTransactions } from '@/lib/db';
-import { calculateTrialBalance } from '@/lib/accounting';
+import { initializeDatabase } from '@/db/schema';
+import { getAllAccounts } from '@/backend/services/accounts.service';
+import { getAllTransactions } from '@/backend/services/transactions.service';
+import { calculateTrialBalanceData } from '@/backend/services/accounting.service';
+import { successResponse, errorResponse } from '@/backend/utils/response';
 
+// GET /api/trial-balance
 export async function GET() {
   try {
     await initializeDatabase();
-    const [accounts, transactions] = await Promise.all([getAccounts(), getTransactions()]);
-    return NextResponse.json(calculateTrialBalance(transactions, accounts));
+    const [accounts, transactions] = await Promise.all([
+      getAllAccounts(),
+      getAllTransactions()
+    ]);
+    const trialBalance = calculateTrialBalanceData(transactions, accounts);
+    return successResponse(trialBalance);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return errorResponse(error.message, 500);
   }
 }

@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server';
-import { initializeDatabase, getAccounts, getTransactions } from '@/lib/db';
-import { calculateLedger } from '@/lib/accounting';
+import { initializeDatabase } from '@/db/schema';
+import { getAllAccounts } from '@/backend/services/accounts.service';
+import { getAllTransactions } from '@/backend/services/transactions.service';
+import { calculateLedgerData } from '@/backend/services/accounting.service';
+import { successResponse, errorResponse } from '@/backend/utils/response';
 
+// GET /api/ledger?account=...
 export async function GET(request) {
   try {
     await initializeDatabase();
@@ -9,17 +12,20 @@ export async function GET(request) {
     const account = searchParams.get('account');
 
     if (!account) {
-      return NextResponse.json({ error: 'Parameter account wajib diisi' }, { status: 400 });
+      return errorResponse('Parameter account wajib diisi', 400);
     }
 
-    const [accounts, transactions] = await Promise.all([getAccounts(), getTransactions()]);
-    const result = calculateLedger(transactions, accounts, account);
+    const [accounts, transactions] = await Promise.all([
+      getAllAccounts(),
+      getAllTransactions()
+    ]);
+    const ledgerData = calculateLedgerData(transactions, accounts, account);
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 404 });
+    if (ledgerData.error) {
+      return errorResponse(ledgerData.error, 404);
     }
-    return NextResponse.json(result);
+    return successResponse(ledgerData);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return errorResponse(error.message, 500);
   }
 }

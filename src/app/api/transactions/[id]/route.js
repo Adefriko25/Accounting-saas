@@ -1,15 +1,17 @@
-import { NextResponse } from 'next/server';
-import { initializeDatabase, deleteTransaction } from '@/lib/db';
+import { initializeDatabase } from '@/db/schema';
+import { removeTransaction } from '@/backend/services/transactions.service';
+import { successResponse, errorResponse } from '@/backend/utils/response';
 
 // DELETE /api/transactions/[id]
 export async function DELETE(request, { params }) {
   try {
     await initializeDatabase();
-    const txId = parseInt(params.id);
-    await deleteTransaction(txId);
-    return NextResponse.json({ message: `Transaksi dengan ID ${txId} berhasil dihapus!` });
+    const result = await removeTransaction(params.id);
+    return successResponse(result);
   } catch (error) {
-    const status = error.message.includes('tidak ditemukan') ? 404 : 500;
-    return NextResponse.json({ error: error.message }, { status });
+    const isNotFound = error.message.includes('tidak ditemukan');
+    const isBadRequest = error.message.includes('tidak valid');
+    const status = isNotFound ? 404 : (isBadRequest ? 400 : 500);
+    return errorResponse(error.message, status);
   }
 }

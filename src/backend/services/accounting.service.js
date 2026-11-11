@@ -1,7 +1,5 @@
-// Accounting calculation helpers - pure JavaScript, no Python needed
-
 /**
- * Build account type lookup map
+ * Map nama akun ke tipe akunnya
  */
 export function buildAccountTypeMap(accounts) {
   const map = {};
@@ -12,11 +10,11 @@ export function buildAccountTypeMap(accounts) {
 }
 
 /**
- * Dashboard data calculation
+ * 1. Kalkulasi Data Dashboard Finansial
  */
-export function calculateDashboard(transactions, accounts) {
+export function calculateDashboardData(transactions, accounts) {
   if (!transactions.length || !accounts.length) {
-    return { empty: true, message: 'Belum ada data.' };
+    return { empty: true, message: 'Belum ada data keuangan.' };
   }
 
   const accTypes = buildAccountTypeMap(accounts);
@@ -54,7 +52,7 @@ export function calculateDashboard(transactions, accounts) {
     m.NetMargin = m.Revenue > 0 ? (m.NetProfit / m.Revenue * 100) : 0;
   }
 
-  // Expense breakdown
+  // Alokasi beban (Expense Breakdown)
   const expenseDetails = {};
   for (const tx of transactions) {
     if (accTypes[tx.debit] === 'Expense') {
@@ -67,9 +65,9 @@ export function calculateDashboard(transactions, accounts) {
 }
 
 /**
- * General Ledger calculation
+ * 2. Kalkulasi Buku Besar (General Ledger)
  */
-export function calculateLedger(transactions, accounts, accountName) {
+export function calculateLedgerData(transactions, accounts, accountName) {
   const acc = accounts.find(a => a.account === accountName);
   if (!acc) return { error: 'Akun tidak ditemukan' };
 
@@ -103,9 +101,9 @@ export function calculateLedger(transactions, accounts, accountName) {
 }
 
 /**
- * Trial Balance calculation
+ * 3. Kalkulasi Neraca Saldo (Trial Balance)
  */
-export function calculateTrialBalance(transactions, accounts) {
+export function calculateTrialBalanceData(transactions, accounts) {
   if (!transactions.length || !accounts.length) {
     return { empty: true, entries: [], total_debit: 0, total_credit: 0, balanced: true };
   }
@@ -143,9 +141,9 @@ export function calculateTrialBalance(transactions, accounts) {
 }
 
 /**
- * Income Statement calculation (monthly matrix)
+ * 4. Kalkulasi Laporan Laba Rugi (Income Statement)
  */
-export function calculateIncomeStatement(transactions, accounts) {
+export function calculateIncomeStatementData(transactions, accounts) {
   if (!transactions.length || !accounts.length) return { empty: true };
 
   const accTypes = buildAccountTypeMap(accounts);
@@ -191,9 +189,9 @@ export function calculateIncomeStatement(transactions, accounts) {
 }
 
 /**
- * Balance Sheet calculation (accumulated monthly)
+ * 5. Kalkulasi Neraca (Balance Sheet)
  */
-export function calculateBalanceSheet(transactions, accounts) {
+export function calculateBalanceSheetData(transactions, accounts) {
   if (!transactions.length || !accounts.length) return { empty: true };
 
   const accTypes = buildAccountTypeMap(accounts);
@@ -253,7 +251,7 @@ export function calculateBalanceSheet(transactions, accounts) {
   rows.push(totalLiab);
   rows.push({ Account: '', is_spacer: true });
 
-  // EQUITY
+  // SHAREHOLDER'S EQUITY
   rows.push({ Account: "SHAREHOLDER'S EQUITY", is_header: true, is_total: false, is_check: false });
   for (const acc of eqAccs) rows.push(makeRow(`  ${acc}`, [acc], 'Equity'));
   rows.push(makeRow('  Retained Earnings', [], '', true));
@@ -279,9 +277,9 @@ export function calculateBalanceSheet(transactions, accounts) {
 }
 
 /**
- * Cashflow calculation
+ * 6. Kalkulasi Arus Kas (Cashflow Statement)
  */
-export function calculateCashflow(transactions, accounts, selectedAccount) {
+export function calculateCashflowData(transactions, accounts, selectedAccount) {
   if (!transactions.length || !accounts.length) return { empty: true };
 
   const assetAccounts = accounts.filter(a => a.type === 'Asset').map(a => a.account);

@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
-import { initializeDatabase, resetDatabase } from '@/lib/db';
+import { initializeDatabase } from '@/db/schema';
+import { resetAllData } from '@/backend/services/transactions.service';
+import { successResponse, errorResponse } from '@/backend/utils/response';
 
+// POST /api/reset
 export async function POST() {
   try {
     await initializeDatabase();
-    await resetDatabase();
-    return NextResponse.json({ message: 'Seluruh data pembukuan & daftar akun berhasil di-reset!' });
+    const result = await resetAllData();
+    return successResponse(result);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return errorResponse(error.message, 500);
   }
 }
